@@ -1,0 +1,75 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: ems.spec.js >> Employee Management System E2E Pipeline >> TC-1: Successful Login with Valid Credentials
+- Location: specs\ems.spec.js:16:3
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: locator.fill: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('#login-email')
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: "[plugin:vite:import-analysis] Failed to resolve import \"./index.css\" from \"src/main.jsx\". Does the file exist?"
+  - generic [ref=e5]: C:/Users/Muhammad Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/src/main.jsx:4:7
+  - generic [ref=e6]: "3 | import ReactDOM from \"react-dom/client\"; 4 | import App from \"./App.jsx\"; 5 | import \"./index.css\"; | ^ 6 | ReactDOM.createRoot(document.getElementById(\"root\")).render( 7 | /* @__PURE__ */ jsxDEV(React.StrictMode, { children: /* @__PURE__ */ jsxDEV(App, {}, void 0, false, {"
+  - generic [ref=e7]: at TransformPluginContext._formatError (file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41) at TransformPluginContext.error (file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16) at normalizeUrl (file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23) at process.processTicksAndRejections (node:internal/process/task_queues:104:5) at async file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39 at async Promise.all (index 4) at async TransformPluginContext.transform (file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7) at async PluginContainer.transform (file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18) at async loadAndTransform (file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27) at async viteTransformMiddleware (file:///C:/Users/Muhammad%20Zohaib/.gemini/antigravity-ide/scratch/software-testing-project/frontend/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24
+  - generic [ref=e8]:
+    - text: Click outside, press Esc key, or fix the code to dismiss.
+    - text: You can also disable this overlay by setting
+    - code [ref=e9]: server.hmr.overlay
+    - text: to
+    - code [ref=e10]: "false"
+    - text: in
+    - code [ref=e11]: vite.config.js
+    - text: .
+```
+
+# Test source
+
+```ts
+  1  | class LoginPage {
+  2  |   constructor(page) {
+  3  |     this.page = page;
+  4  |     this.emailInput = page.locator('#login-email');
+  5  |     this.passwordInput = page.locator('#login-password');
+  6  |     this.loginButton = page.locator('#btn-login');
+  7  |     this.errorAlert = page.locator('#login-error');
+  8  |   }
+  9  | 
+  10 |   async navigate() {
+  11 |     await this.page.goto('/');
+  12 |   }
+  13 | 
+  14 |   async login(email, password) {
+> 15 |     await this.emailInput.fill(email);
+     |                           ^ Error: locator.fill: Test timeout of 30000ms exceeded.
+  16 |     await this.passwordInput.fill(password);
+  17 |     await this.loginButton.click();
+  18 |   }
+  19 | 
+  20 |   async getErrorMessage() {
+  21 |     await this.errorAlert.waitFor({ state: 'visible' });
+  22 |     return await this.errorAlert.textContent();
+  23 |   }
+  24 | }
+  25 | 
+  26 | module.exports = LoginPage;
+  27 | 
+```

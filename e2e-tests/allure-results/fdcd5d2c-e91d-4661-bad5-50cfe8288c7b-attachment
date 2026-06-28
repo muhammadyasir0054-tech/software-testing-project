@@ -1,0 +1,147 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: ems.spec.js >> Employee Management System E2E Pipeline >> Authenticated Dashboard Workflows >> TC-7: Delete Employee - Verify Confirmation
+- Location: specs\ems.spec.js:103:5
+
+# Error details
+
+```
+Error: expect(locator).toHaveText(expected) failed
+
+Locator:  locator('#stat-total .stat-val')
+Expected: "-1"
+Received: "5"
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveText" with timeout 5000ms
+  - waiting for locator('#stat-total .stat-val')
+    14 × locator resolved to <span class="stat-val">5</span>
+       - unexpected value "5"
+
+```
+
+```yaml
+- text: "5"
+```
+
+# Test source
+
+```ts
+  12  |     dashboardPage = new DashboardPage(page);
+  13  |     await loginPage.navigate();
+  14  |   });
+  15  | 
+  16  |   test('TC-1: Successful Login with Valid Credentials', async () => {
+  17  |     await loginPage.login(testData.validAdmin.email, testData.validAdmin.password);
+  18  |     await expect(dashboardPage.logoutButton).toBeVisible();
+  19  |     
+  20  |     const totalCount = await dashboardPage.getTotalEmployees();
+  21  |     expect(Number(totalCount)).toBeGreaterThan(0);
+  22  |   });
+  23  | 
+  24  |   test('TC-2: Rejected Login with Invalid Credentials', async () => {
+  25  |     await loginPage.login(testData.invalidAdmin.email, testData.invalidAdmin.password);
+  26  |     const errorMsg = await loginPage.getErrorMessage();
+  27  |     expect(errorMsg).toContain(testData.invalidAdmin.expectedError);
+  28  |   });
+  29  | 
+  30  |   test.describe('Authenticated Dashboard Workflows', () => {
+  31  |     test.beforeEach(async () => {
+  32  |       await loginPage.login(testData.validAdmin.email, testData.validAdmin.password);
+  33  |       await expect(dashboardPage.logoutButton).toBeVisible();
+  34  |     });
+  35  | 
+  36  |     test('TC-3: Create Employee - Successful Save', async () => {
+  37  |       const initialTotal = Number(await dashboardPage.getTotalEmployees());
+  38  |       
+  39  |       await dashboardPage.openAddEmployeeModal();
+  40  |       await dashboardPage.fillEmployeeForm(testData.newEmployee);
+  41  |       await dashboardPage.submitEmployeeForm();
+  42  | 
+  43  |       // Verify stats updated
+  44  |       await expect(dashboardPage.statTotal).toHaveText((initialTotal + 1).toString());
+  45  |       
+  46  |       // Verify employee shows up in table
+  47  |       const row = await dashboardPage.getEmployeeRow(testData.newEmployee.email);
+  48  |       await expect(row).toBeVisible();
+  49  |       await expect(row.locator('.emp-name-cell')).toHaveText(testData.newEmployee.name);
+  50  |     });
+  51  | 
+  52  |     test('TC-4: Create Employee - Reject Duplicate Email', async () => {
+  53  |       await dashboardPage.openAddEmployeeModal();
+  54  |       await dashboardPage.fillEmployeeForm(testData.duplicateEmployee);
+  55  |       await dashboardPage.submitEmployeeForm();
+  56  | 
+  57  |       const errorMsg = await dashboardPage.getFormErrorMessage();
+  58  |       expect(errorMsg).toContain(testData.duplicateEmployee.expectedError);
+  59  |       
+  60  |       await dashboardPage.closeEmployeeModal();
+  61  |     });
+  62  | 
+  63  |     test('TC-5: Search and Filter Employees by Department', async () => {
+  64  |       // Filter by Engineering
+  65  |       await dashboardPage.filterByDepartment('Engineering');
+  66  |       
+  67  |       // All visible rows should show 'Engineering'
+  68  |       const rowsCount = await dashboardPage.employeeRows.count();
+  69  |       for (let i = 0; i < rowsCount; i++) {
+  70  |         const deptText = await dashboardPage.employeeRows.nth(i).locator('.dept-badge').textContent();
+  71  |         expect(deptText).toBe('Engineering');
+  72  |       }
+  73  | 
+  74  |       // Search for specific employee
+  75  |       await dashboardPage.search('Jane Smith');
+  76  |       
+  77  |       // Verify it filters matches or shows empty if not in Engineering (Jane Smith is HR, so should be empty)
+  78  |       if (rowsCount > 0) {
+  79  |         const bodyText = await dashboardPage.page.textContent('.employee-table');
+  80  |         expect(bodyText).not.toContain('Jane Smith');
+  81  |       }
+  82  | 
+  83  |       // Reset filter and search
+  84  |       await dashboardPage.filterByDepartment('All');
+  85  |       await dashboardPage.search('Jane Smith');
+  86  |       const filteredRow = await dashboardPage.getEmployeeRow('jane.smith@ems.com');
+  87  |       await expect(filteredRow).toBeVisible();
+  88  |     });
+  89  | 
+  90  |     test('TC-6: Update Salary and Verify Modifications', async () => {
+  91  |       const targetEmail = 'jane.smith@ems.com';
+  92  |       await dashboardPage.clickEditEmployee(targetEmail);
+  93  |       
+  94  |       // Update salary
+  95  |       await dashboardPage.fillEmployeeForm({ salary: testData.updateEmployee.newSalary });
+  96  |       await dashboardPage.submitEmployeeForm();
+  97  | 
+  98  |       // Verify updated salary is reflected in the table
+  99  |       const row = await dashboardPage.getEmployeeRow(targetEmail);
+  100 |       await expect(row.locator('.emp-salary-cell')).toHaveText(`$${testData.updateEmployee.newSalary.toLocaleString()}`);
+  101 |     });
+  102 | 
+  103 |     test('TC-7: Delete Employee - Verify Confirmation', async () => {
+  104 |       // We delete the newly created test employee
+  105 |       const targetEmail = testData.newEmployee.email;
+  106 |       const initialTotal = Number(await dashboardPage.getTotalEmployees());
+  107 | 
+  108 |       await dashboardPage.clickDeleteEmployee(targetEmail);
+  109 |       await dashboardPage.confirmDeletion();
+  110 | 
+  111 |       // Verify stats decremented
+> 112 |       await expect(dashboardPage.statTotal).toHaveText((initialTotal - 1).toString());
+      |                                             ^ Error: expect(locator).toHaveText(expected) failed
+  113 | 
+  114 |       // Verify no longer present in list
+  115 |       await dashboardPage.search(targetEmail);
+  116 |       await expect(dashboardPage.emptyState).toBeVisible();
+  117 |     });
+  118 |   });
+  119 | });
+  120 | 
+```

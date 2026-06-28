@@ -1,0 +1,16 @@
+{
+  "name": "ems-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E Automated Testing suite for EMS using Playwright and POM",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "allure-commandline": "^2.43.0",
+    "allure-playwright": "^2.10.0"
+  }
+}

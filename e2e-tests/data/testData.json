@@ -1,0 +1,37 @@
+{
+  "validAdmin": {
+    "email": "admin@ems.com",
+    "password": "admin123"
+  },
+  "invalidAdmin": {
+    "email": "wrong@ems.com",
+    "password": "wrongpassword",
+    "expectedError": "Invalid username or password."
+  },
+  "newEmployee": {
+    "name": "Jane Test",
+    "email": "jane.test@ems.com",
+    "department": "Engineering",
+    "salary": 95000,
+    "status": "Active"
+  },
+  "duplicateEmployee": {
+    "name": "Duplicate User",
+    "email": "john.doe@ems.com",
+    "department": "HR",
+    "salary": 65000,
+    "status": "Active",
+    "expectedError": "Email already exists."
+  },
+  "invalidSalaryEmployee": {
+    "name": "Bad Salary User",
+    "email": "badsalary@ems.com",
+    "department": "Sales",
+    "salary": -5000,
+    "status": "Active",
+    "expectedError": "Salary must be a positive number."
+  },
+  "updateEmployee": {
+    "newSalary": 105000
+  }
+}
